@@ -1,5 +1,10 @@
+import { IsDate, IsInt, IsString } from 'class-validator';
+
 export class CreateAttendanceDto {
-  attendance_no: string;
-  user_id: string;
-  attendance_date: string | Date;
+  @IsInt()
+  readonly attendance_no: string;
+  @IsString()
+  readonly user_id: string;
+  @IsDate()
+  readonly attendance_date: Date;
 }
