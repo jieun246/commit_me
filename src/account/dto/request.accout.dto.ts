@@ -1,12 +1,17 @@
-import { IsInt, IsString, Min } from 'class-validator';
+import { IsEmpty, IsInt, IsString, Min } from 'class-validator';
 
-export class CreateAccountDto {
+export class AccountDto {
   @IsString()
-  readonly user_id: string;
+  @IsEmpty()
+  user_id: string;
+
   @IsString()
-  readonly name: string;
+  @IsEmpty()
+  name: string;
+
   @IsString()
-  readonly image_url: string;
+  image_url: string;
+
   @IsString()
   readonly github_address: string;
 

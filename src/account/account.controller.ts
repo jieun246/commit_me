@@ -1,20 +1,26 @@
-import { Controller, Get, Param, Query } from '@nestjs/common';
-import { Account } from './interface/account.interface';
+import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
 import { AccountService } from './account.service';
+import { AccountDto } from './dto/request.accout.dto';
 
 @Controller('account')
 export class AccountController {
   constructor(private readonly accountService: AccountService) {}
 
-  //랭킹 조회
-  @Get('/ranking')
-  getRanking(@Query('kind') kind: string): Account[] {
-    return this.accountService.findAll(kind);
+  //계정 생성
+  @Post('/join')
+  async joinAccount(@Body() body: AccountDto) {
+    return await this.accountService.create(body);
   }
 
   //계정 상세
   @Get('/:id')
-  getAccountDetail(@Param('id') userId: string): Account {
-    return this.accountService.getOne(userId);
+  async getAccountDetail(@Param('id') userId: object) {
+    return await this.accountService.getOne(userId);
+  }
+
+  //랭킹 조회
+  @Get('/ranking')
+  async getRanking(@Query('kind') kind: string) {
+    return await this.accountService.findAll(kind);
   }
 }
