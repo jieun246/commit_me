@@ -12,8 +12,6 @@ import { AttendanceModule } from './attendance/attendance.module';
     MongooseModule.forRoot(process.env.DB_URL, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
     }),
     AccountModule,
     AttendanceModule,

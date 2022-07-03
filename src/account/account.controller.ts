@@ -1,6 +1,7 @@
-import { Body, Controller, Get, Param, Post, Query } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Put, Query } from '@nestjs/common';
 import { AccountService } from './account.service';
-import { AccountDto } from './dto/request.accout.dto';
+import { CreateAccountDto } from './dto/create-accout.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 
 @Controller('account')
 export class AccountController {
@@ -8,13 +9,13 @@ export class AccountController {
 
   //계정 생성
   @Post('/join')
-  async joinAccount(@Body() body: AccountDto) {
+  async joinAccount(@Body() body: CreateAccountDto) {
     return await this.accountService.create(body);
   }
 
   //계정 상세
   @Get('/:id')
-  async getAccountDetail(@Param('id') userId: object) {
+  async getAccountDetail(@Param('id') userId: string) {
     return await this.accountService.getOne(userId);
   }
 
@@ -22,5 +23,11 @@ export class AccountController {
   @Get('/ranking')
   async getRanking(@Query('kind') kind: string) {
     return await this.accountService.findAll(kind);
+  }
+
+  //건수 업데이트
+  @Put('/ranking/:id')
+  async updateRanking(@Param('id') id: object, @Body() body: UpdateAccountDto) {
+    return await this.accountService.update(id, body);
   }
 }

@@ -57,15 +57,6 @@ export class Account {
     default: 0,
   })
   comments: number;
-
-  readonly readOnlyData: { user_id: string; name: string };
 }
 
 export const AccountSchema = SchemaFactory.createForClass(Account);
-
-AccountSchema.virtual('readOnlyData').get(function (this: Account) {
-  return {
-    user_id: this.user_id,
-    name: this.name,
-  };
-});

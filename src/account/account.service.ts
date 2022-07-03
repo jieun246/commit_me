@@ -5,7 +5,8 @@ import {
 } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { AccountDto } from './dto/request.accout.dto';
+import { CreateAccountDto } from './dto/create-accout.dto';
+import { UpdateAccountDto } from './dto/update-account.dto';
 import { Account } from './schema/account.schema';
 
 @Injectable()
@@ -15,7 +16,7 @@ export class AccountService {
   ) {}
 
   //계정 생성
-  async create(body: AccountDto) {
+  async create(body: CreateAccountDto): Promise<CreateAccountDto> {
     const { user_id, name, image_url, github_address } = body;
 
     const isUserExist = await this.accountModel.exists({ user_id });
@@ -24,27 +25,32 @@ export class AccountService {
       throw new UnauthorizedException('해당하는 아이디가 존재합니다.');
     }
 
-    const account = await this.accountModel.create({
-      user_id,
-      name,
-      image_url,
-      github_address,
-    });
+    try {
+      const account = await this.accountModel.create({
+        user_id,
+        name,
+        image_url,
+        github_address,
+      });
 
-    return account.readOnlyData;
+      return account;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 
   //계정 상세
-  async getOne(_id: object): Promise<AccountDto> {
-    const account = await this.accountModel.findById(_id);
+  async getOne(user_id: string): Promise<CreateAccountDto> {
+    const account = await this.accountModel.findOne({ user_id });
     if (!account) {
-      throw new NotFoundException(`Account with ID ${_id} not found.`);
+      throw new NotFoundException(`${user_id} ID not found.`);
     }
     return account;
   }
 
   //랭킹순으로 정렬 추가
-  async findAll(kind: string): Promise<Account[]> {
+  async findAll(kind: string): Promise<CreateAccountDto[]> {
     let orderObj = {};
     if (kind === 'attendance') {
       orderObj = { attendances: -1 };
@@ -59,9 +65,16 @@ export class AccountService {
   }
 
   //랭킹 업데이트
-  // async update(body: AccountDto) {
-  //   const {  _id, } = body;
-
-  //   const account = await this.accountModel.findByIdAndUpdate(;
-  // }
+  async update(_id: object, body: UpdateAccountDto): Promise<UpdateAccountDto> {
+    try {
+      const account = await this.accountModel.findByIdAndUpdate(_id, body);
+      if (!account) {
+        throw new NotFoundException(`ID not found.`);
+      }
+      return account;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  }
 }

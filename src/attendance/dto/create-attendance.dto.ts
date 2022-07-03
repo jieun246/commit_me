@@ -1,10 +1,11 @@
-import { IsDate, IsInt, IsString } from 'class-validator';
+import { IsDate, IsEmpty, IsString } from 'class-validator';
 
 export class CreateAttendanceDto {
-  @IsInt()
-  readonly attendance_no: string;
   @IsString()
-  readonly user_id: string;
+  @IsEmpty()
+  user_id: string;
+
   @IsDate()
-  readonly attendance_date: Date;
+  @IsEmpty()
+  attendance_date: Date;
 }
