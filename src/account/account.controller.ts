@@ -13,21 +13,21 @@ export class AccountController {
     return await this.accountService.create(body);
   }
 
-  //계정 상세
-  @Get('/:id')
-  async getAccountDetail(@Param('id') userId: string) {
-    return await this.accountService.getOne(userId);
-  }
-
   //랭킹 조회
   @Get('/ranking')
   async getRanking(@Query('kind') kind: string) {
     return await this.accountService.findAll(kind);
   }
 
+  //계정 상세
+  @Get('/:id')
+  async getAccountDetail(@Param('id') userId: string) {
+    return await this.accountService.getOne(userId);
+  }
+
   //건수 업데이트
-  @Put('/ranking/:id')
-  async updateRanking(@Param('id') id: object, @Body() body: UpdateAccountDto) {
-    return await this.accountService.update(id, body);
+  @Put('/ranking-update')
+  async updateRanking(@Body() body: UpdateAccountDto) {
+    return await this.accountService.update(body);
   }
 }

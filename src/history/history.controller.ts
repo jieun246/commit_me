@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post, Query } from '@nestjs/common';
 import { CreateHistoryDto } from './dto/create-history.dto';
 import { HistoryService } from './history.service';
 
@@ -13,8 +13,8 @@ export class HistoryController {
   }
 
   //히스토리 조회
-  @Get('/:kind/:id')
-  async getHistory(@Param('kind') kind: string, @Param('id') id: string) {
+  @Get('/detail')
+  async getHistory(@Query('kind') kind: string, @Query('id') id: string) {
     return await this.historyService.getOne(kind, id);
   }
 }

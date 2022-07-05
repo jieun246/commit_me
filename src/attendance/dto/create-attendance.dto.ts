@@ -1,11 +1,10 @@
-import { IsDate, IsEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateAttendanceDto {
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   user_id: string;
 
-  @IsDate()
-  @IsEmpty()
+  @IsNotEmpty()
   attendance_date: Date;
 }

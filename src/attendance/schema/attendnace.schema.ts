@@ -1,17 +1,16 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { IsDate, IsEmpty, IsString } from 'class-validator';
+import { IsNotEmpty, IsString } from 'class-validator';
 
 @Schema()
 export class Attendance {
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   @Prop({
     required: true,
   })
   user_id: string;
 
-  @IsDate()
-  @IsEmpty()
+  @IsNotEmpty()
   @Prop({
     required: true,
   })

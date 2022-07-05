@@ -14,6 +14,7 @@ export class HistoryService {
   async create(body: CreateHistoryDto): Promise<CreateHistoryDto> {
     const { user_id, kind, last_page, content } = body;
 
+    //해당 내용 유무 체크
     const isHistoryExist = await this.historyModel.exists({
       user_id,
       kind,
@@ -24,6 +25,7 @@ export class HistoryService {
       throw new UnauthorizedException('이미 존재합니다.');
     }
 
+    //생성
     try {
       const history = await this.historyModel.create({
         user_id,

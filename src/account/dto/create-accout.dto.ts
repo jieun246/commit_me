@@ -1,12 +1,12 @@
-import { IsEmpty, IsInt, IsString, Min } from 'class-validator';
+import { IsEmpty, IsInt, IsNotEmpty, IsString, Min } from 'class-validator';
 
 export class CreateAccountDto {
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   readonly user_id: string;
 
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   readonly name: string;
 
   @IsString()

@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaOptions } from 'mongoose';
-import { IsEmpty, IsInt, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 const options: SchemaOptions = {
   timestamps: true,
@@ -9,21 +9,21 @@ const options: SchemaOptions = {
 @Schema(options)
 export class History {
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   @Prop({
     required: true,
   })
   user_id: string;
 
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   @Prop({
     required: true,
   })
   kind: string;
 
   @IsInt()
-  @IsEmpty()
+  @IsNotEmpty()
   @Prop({
     required: true,
   })

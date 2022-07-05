@@ -15,8 +15,8 @@ export class AttendanceController {
   //출석체크 조회
   @Get('/search')
   async getAttendance(
-    @Query('start_date') startDate: Date,
-    @Query('end_date') endDate: Date,
+    @Query('startDate') startDate: string,
+    @Query('endDate') endDate: string,
   ) {
     return await this.attendanceService.findAll(startDate, endDate);
   }

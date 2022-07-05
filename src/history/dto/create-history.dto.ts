@@ -1,16 +1,16 @@
-import { IsEmpty, IsInt, IsString } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateHistoryDto {
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   user_id: string;
 
   @IsString()
-  @IsEmpty()
+  @IsNotEmpty()
   kind: string;
 
   @IsInt()
-  @IsEmpty()
+  @IsNotEmpty()
   last_page: number;
 
   @IsString()
