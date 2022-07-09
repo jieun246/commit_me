@@ -1,6 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { SchemaOptions } from 'mongoose';
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsDate, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 const options: SchemaOptions = {
   timestamps: true,
@@ -28,6 +28,11 @@ export class History {
     required: true,
   })
   last_page: number;
+
+  @IsDate()
+  @IsNotEmpty()
+  @Prop()
+  action_date: Date;
 
   @IsString()
   @Prop()

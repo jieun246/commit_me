@@ -1,4 +1,4 @@
-import { IsInt, IsNotEmpty, IsString } from 'class-validator';
+import { IsDate, IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class CreateHistoryDto {
   @IsString()
@@ -12,6 +12,10 @@ export class CreateHistoryDto {
   @IsInt()
   @IsNotEmpty()
   last_page: number;
+
+  @IsDate()
+  @IsNotEmpty()
+  action_date: Date;
 
   @IsString()
   content: string;

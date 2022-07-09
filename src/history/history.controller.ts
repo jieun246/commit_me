@@ -1,20 +1,22 @@
-import { Body, Controller, Get, Post, Query } from '@nestjs/common';
-import { CreateHistoryDto } from './dto/create-history.dto';
+import { Controller, Get, Post, Query } from '@nestjs/common';
 import { HistoryService } from './history.service';
 
 @Controller('history')
 export class HistoryController {
   constructor(private readonly historyService: HistoryService) {}
 
-  //히스토리 생성
-  @Post('/register')
-  async registerHistory(@Body() body: CreateHistoryDto) {
-    return await this.historyService.create(body);
+  //전체 조회
+  @Get('')
+  async getHistoryAll(@Query('kind') kind: string) {
+    return await this.historyService.findAll(kind);
   }
 
-  //히스토리 조회
-  @Get('/detail')
-  async getHistory(@Query('kind') kind: string, @Query('id') id: string) {
-    return await this.historyService.getOne(kind, id);
+  //히스토리 생성
+  @Post('/register')
+  async registerHistory(
+    @Query('kind') kind: string,
+    @Query('page') page: number,
+  ) {
+    return await this.historyService.create(kind, page);
   }
 }
