@@ -13,11 +13,16 @@ export class HistoryService {
 
   // 전체 조회
   async findAll(kind: string): Promise<CreateHistoryDto[]> {
-    return this.historyModel.find({ kind });
+    return await this.historyModel.find({ kind });
   }
 
-  // 생성
-  async create(kind: string, page: number): Promise<CreateHistoryDto[]> {
+  // 삭제
+  async delete(kind: string) {
+    return await this.historyModel.remove({ kind });
+  }
+
+  // 생성 : Promise<CreateHistoryDto[]>
+  async create(kind: string, page: number) {
     const octokit = new Octokit({
       auth: process.env.GIT_AUTH,
     });
@@ -26,17 +31,17 @@ export class HistoryService {
     let setKind = kind;
 
     //깃API 주소 셋팅
-    if (setKind === 'comments2') {
-      url = `${url}/pulls/{kind}?page={page}`;
+    if (setKind === 'pull_comments') {
+      url = `${url}/pulls/{kind}?page={page}&sort=created_at&direction=asc`;
     } else {
       url = `${url}/{kind}?page={page}`;
       if (kind === 'pulls') url = `${url}&state=all`;
     }
 
-    if (setKind === 'comments2') setKind = 'comments';
+    if (setKind === 'pull_comments') setKind = 'comments';
 
     //깃API 연동
-    // 1. 초기 데이터 일괄 처리
+    //// 1. 초기 데이터 일괄 처리
     // 2. 마지막 데이터 기준으로 깃 API 연동 > 데이터 누적 처리
     const datas = await octokit.request(`GET ${url}`, {
       owner: process.env.GIT_OWNER,
@@ -48,7 +53,6 @@ export class HistoryService {
     const { data } = datas;
     const historyArr = [];
     let historyObj = {};
-    let isHistoryExist = '';
 
     //데이터 셋팅
     for (const item of data) {
@@ -91,27 +95,20 @@ export class HistoryService {
         };
       }
 
-      //데이터 있는지 확인
-      isHistoryExist = await this.historyModel.findOne({
-        kind: setKind,
+      historyArr.push({
+        kind,
         last_page: page,
         ...historyObj,
       });
-
-      //데이터가 없는 것만 배열에 추가
-      if (!isHistoryExist) {
-        historyArr.push({
-          kind: setKind,
-          last_page: page,
-          ...historyObj,
-        });
-      }
     }
 
     // 데이터 일괄 등록
     try {
-      this.historyModel.insertMany(historyArr);
-      return this.historyModel.find({ kind });
+      const result = await this.historyModel.insertMany(historyArr, {
+        ordered: false,
+      });
+      console.log(`${result.length} documents were inserted`);
+      return result;
     } catch (error) {
       console.log(error);
       throw error;

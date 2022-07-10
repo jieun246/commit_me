@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Query } from '@nestjs/common';
+import { Controller, Delete, Get, Post, Query } from '@nestjs/common';
 import { HistoryService } from './history.service';
 
 @Controller('history')
@@ -18,5 +18,10 @@ export class HistoryController {
     @Query('page') page: number,
   ) {
     return await this.historyService.create(kind, page);
+  }
+
+  @Delete('/remove')
+  async deleteHistory(@Query('kind') kind: string) {
+    return await this.historyService.delete(kind);
   }
 }
