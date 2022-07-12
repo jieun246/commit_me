@@ -7,6 +7,7 @@ import { AccountModule } from './account/account.module';
 import { AttendanceModule } from './attendance/attendance.module';
 import { HistoryModule } from './history/history.module';
 import { LoggerMiddleware } from './common/middlewares/logger.middleware';
+import { BatchModule } from './batch/batch.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -19,6 +20,7 @@ import mongoose from 'mongoose';
     AccountModule,
     AttendanceModule,
     HistoryModule,
+    BatchModule,
   ],
   controllers: [AppController],
   providers: [AppService],

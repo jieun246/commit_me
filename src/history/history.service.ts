@@ -16,6 +16,21 @@ export class HistoryService {
     return await this.historyModel.find({ kind });
   }
 
+  // 마지막 데이터 조회
+  async getOne(kind: string): Promise<CreateHistoryDto> {
+    let sortObj = {};
+    if (kind === 'commits' || kind === 'pull_comments')
+      sortObj = { action_date: -1 };
+    else sortObj = { last_page: -1 };
+
+    const history = await this.historyModel
+      .findOne({ kind })
+      .sort(sortObj)
+      .limit(1);
+
+    return history;
+  }
+
   // 삭제
   async delete(kind: string) {
     return await this.historyModel.remove({ kind });
