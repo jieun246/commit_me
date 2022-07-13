@@ -23,29 +23,60 @@ export class BatchService {
     if (!history) throw new NotFoundException('기록이 없습니다.');
 
     const { action_date } = history;
+    const setSince = new Date(action_date); //ISO 변환
 
-    //총 페이지 계산
-    let page = 0;
-    for (let i = 1; ; ) {
+    //데이터 셋팅
+    let page = 1;
+    const historyArr = [];
+    let historyObj = {};
+    do {
+      //GIT API 호출(data가 있으면 loop, 없으면 break)
       const datas = await octokit.request(
-        `GET ${url}?page{page}&since={since}`,
+        `GET ${url}/{kind}?since={since}&page={page}`,
         {
-          owner: process.env.GIT_OWNER,
-          repo: process.env.GIT_REPO,
-          kind: 'commit',
-          page: i,
-          since: action_date,
+          kind: 'commits',
+          since: setSince.toISOString(),
+          page: page,
         },
       );
       const { data } = datas;
-      if (Array.isArray(data) && data.length === 0) {
-        console.log(i);
-        page = i;
-        break;
+      if (Array.isArray(data) && data.length === 0) break; //빈값이면 break
+      for (const item of data) {
+        const {
+          sha,
+          commit: {
+            author: { name, date },
+          },
+        } = item;
+        historyObj = {
+          user_id: name,
+          action_date: date,
+          content: sha,
+        };
+        //이미 있는 데이터는 array 누적 X(에러 방지용으로 한번 더 검사)
+        const isExist = await this.historyService.checkOne(
+          name,
+          'commits',
+          date,
+          sha,
+        );
+        if (!isExist) {
+          historyArr.push({
+            kind: 'commits',
+            last_page: page,
+            ...historyObj,
+          });
+        }
       }
-
-      i += 1;
+      page += 1;
+    } while (true);
+    //데이터 누적 처리
+    try {
+      await this.historyService.creatTest(historyArr);
+      this.logger.log(`Task Done ::: [${page - 1}]`);
+    } catch (error) {
+      this.logger.error(`Task error ::: ${error}`);
+      throw error;
     }
-    this.logger.log(`Task Called ::: [${page}]`);
   }
 }

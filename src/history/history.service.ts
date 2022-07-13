@@ -31,9 +31,35 @@ export class HistoryService {
     return history;
   }
 
+  // 값이 있는지 확인
+  async checkOne(
+    user_id: string,
+    kind: string,
+    action_date: Date,
+    content: string,
+  ) {
+    const isExist = await this.historyModel.exists({
+      user_id,
+      kind,
+      action_date,
+      content,
+    });
+
+    return isExist;
+  }
+
   // 삭제
   async delete(kind: string) {
     return await this.historyModel.remove({ kind });
+  }
+
+  // 생성 테스트
+  async creatTest(historyArr: Array<CreateHistoryDto>) {
+    const result = await this.historyModel.insertMany(historyArr, {
+      ordered: false,
+    });
+    console.log(`${result.length}개만 누적 성공`);
+    return result;
   }
 
   // 생성 : Promise<CreateHistoryDto[]>
@@ -57,10 +83,8 @@ export class HistoryService {
 
     //깃API 연동
     //// 1. 초기 데이터 일괄 처리
-    // 2. 마지막 데이터 기준으로 깃 API 연동 > 데이터 누적 처리
+    //// 2. 마지막 데이터 기준으로 깃 API 연동 > 데이터 누적 처리
     const datas = await octokit.request(`GET ${url}`, {
-      owner: process.env.GIT_OWNER,
-      repo: process.env.GIT_REPO,
       kind: setKind,
       page: page,
     });
@@ -118,15 +142,16 @@ export class HistoryService {
     }
 
     // 데이터 일괄 등록
-    try {
-      const result = await this.historyModel.insertMany(historyArr, {
-        ordered: false,
-      });
-      console.log(`${result.length} documents were inserted`);
-      return result;
-    } catch (error) {
-      console.log(error);
-      throw error;
-    }
+    console.log(historyArr);
+    // try {
+    //   const result = await this.historyModel.insertMany(historyArr, {
+    //     ordered: false,
+    //   });
+    //   console.log(`${result.length} documents were inserted`);
+    //   return result;
+    // } catch (error) {
+    //   console.log(error);
+    //   throw error;
+    // }
   }
 }
