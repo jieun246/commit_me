@@ -81,14 +81,14 @@ export class AccountService {
     }
     const { _id } = account;
 
-    //업데이트 처리
+    // 업데이트 처리
     try {
       const rakingUpdate = await this.accountModel.findByIdAndUpdate(
         _id,
         body,
         { new: true },
       );
-
+      console.log(`${user_id} 업데이트 성공`);
       return rakingUpdate;
     } catch (error) {
       console.log(error);

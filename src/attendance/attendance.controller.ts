@@ -7,10 +7,10 @@ export class AttendanceController {
   constructor(private readonly attendanceService: AttendanceService) {}
 
   //생성
-  @Post('/register')
-  async registerAttendance(@Body() body: CreateAttendanceDto) {
-    return await this.attendanceService.create(body);
-  }
+  // @Post('/register')
+  // async registerAttendance(@Body() body: CreateAttendanceDto) {
+  //   return await this.attendanceService.create(body);
+  // }
 
   //출석체크 조회
   @Get('/search')

@@ -17,7 +17,7 @@ export class HistoryService {
   }
 
   // 마지막 데이터 조회
-  async getOne(kind: string): Promise<CreateHistoryDto> {
+  async getLastOne(kind: string): Promise<CreateHistoryDto> {
     let sortObj = {};
     if (kind === 'commits' || kind === 'pull_comments')
       sortObj = { action_date: -1 };
@@ -31,21 +31,27 @@ export class HistoryService {
     return history;
   }
 
-  // 값이 있는지 확인
-  async checkOne(
-    user_id: string,
-    kind: string,
-    action_date: Date,
-    content: string,
-  ) {
-    const isExist = await this.historyModel.exists({
-      user_id,
-      kind,
-      action_date,
-      content,
-    });
+  // 날짜별 출석 조회
+  async findAttendanceByUser(user_id: string) {
+    const pipelie = [
+      { $match: { user_id } },
+      {
+        $group: {
+          _id: { $dateToString: { format: '%Y-%m-%d', date: '$action_date' } },
+          count: { $sum: 1 },
+        },
+      },
+    ];
+    return await this.historyModel.aggregate(pipelie);
+  }
 
-    return isExist;
+  // 항목별 group 조회
+  async findGroupByKind(user_id: string) {
+    const pipelie = [
+      { $match: { user_id } },
+      { $group: { _id: '$kind', count: { $sum: 1 } } },
+    ];
+    return await this.historyModel.aggregate(pipelie);
   }
 
   // 삭제
@@ -53,105 +59,94 @@ export class HistoryService {
     return await this.historyModel.remove({ kind });
   }
 
-  // 생성 테스트
-  async creatTest(historyArr: Array<CreateHistoryDto>) {
-    const result = await this.historyModel.insertMany(historyArr, {
-      ordered: false,
-    });
-    console.log(`${result.length}개만 누적 성공`);
-    return result;
-  }
-
-  // 생성 : Promise<CreateHistoryDto[]>
-  async create(kind: string, page: number) {
+  // 생성
+  async create(kind: string, url: string, page: number, requestObj: any) {
     const octokit = new Octokit({
       auth: process.env.GIT_AUTH,
     });
 
-    let url = process.env.GIT_URL;
-    let setKind = kind;
-
-    //깃API 주소 셋팅
-    if (setKind === 'pull_comments') {
-      url = `${url}/pulls/{kind}?page={page}&sort=created_at&direction=asc`;
-    } else {
-      url = `${url}/{kind}?page={page}`;
-      if (kind === 'pulls') url = `${url}&state=all`;
-    }
-
-    if (setKind === 'pull_comments') setKind = 'comments';
-
-    //깃API 연동
-    //// 1. 초기 데이터 일괄 처리
-    //// 2. 마지막 데이터 기준으로 깃 API 연동 > 데이터 누적 처리
-    const datas = await octokit.request(`GET ${url}`, {
-      kind: setKind,
-      page: page,
-    });
-
-    const { data } = datas;
     const historyArr = [];
     let historyObj = {};
 
-    //데이터 셋팅
-    for (const item of data) {
-      if (setKind === 'commits') {
-        //커밋
-        const {
-          sha,
-          commit: {
-            author: { name, date },
-          },
-        } = item;
-        historyObj = {
-          user_id: name,
-          action_date: date,
-          content: sha,
-        };
-      } else if (setKind === 'pulls') {
-        //풀퀘
-        const {
-          number,
-          merged_at,
-          user: { login },
-        } = item;
-        historyObj = {
-          user_id: login,
-          action_date: merged_at,
-          content: number,
-        };
-      } else if (setKind === 'comments') {
-        //댓글
-        const {
-          body,
-          created_at,
-          user: { login },
-        } = item;
-        historyObj = {
-          user_id: login,
-          action_date: created_at,
-          content: body,
+    //깃API 연동
+    do {
+      const datas = await octokit.request(`GET ${url}`, requestObj);
+
+      const { data } = datas;
+      if (Array.isArray(data) && data.length === 0) break; //빈값이면 break
+
+      //데이터 셋팅
+      for (const item of data) {
+        if (kind === 'commits') {
+          //커밋
+          const {
+            sha,
+            commit: {
+              author: { name, date },
+            },
+          } = item;
+          historyObj = {
+            kind,
+            user_id: name,
+            action_date: date,
+            content: sha,
+          };
+        } else if (kind === 'pulls') {
+          //풀퀘
+          const {
+            number,
+            merged_at,
+            user: { login },
+          } = item;
+          historyObj = {
+            kind,
+            user_id: login,
+            action_date: merged_at,
+            content: number,
+          };
+        } else if (kind === 'comments' || kind === 'pull_comments') {
+          //댓글
+          const {
+            body,
+            created_at,
+            user: { login },
+          } = item;
+          historyObj = {
+            kind,
+            user_id: login,
+            action_date: created_at,
+            content: body,
+          };
+        }
+
+        //이미 있는 데이터는 array 누적 X(에러 방지용으로 한번 더 검사)
+        const isExist = await this.historyModel.exists(historyObj);
+        if (!isExist) {
+          historyArr.push({
+            last_page: page,
+            ...historyObj,
+          });
+        }
+
+        //페이지 및 파라미터 수정
+        page += 1;
+        requestObj = {
+          ...requestObj,
+          page,
         };
       }
-
-      historyArr.push({
-        kind,
-        last_page: page,
-        ...historyObj,
-      });
-    }
+    } while (true);
 
     // 데이터 일괄 등록
-    console.log(historyArr);
-    // try {
-    //   const result = await this.historyModel.insertMany(historyArr, {
-    //     ordered: false,
-    //   });
-    //   console.log(`${result.length} documents were inserted`);
-    //   return result;
-    // } catch (error) {
-    //   console.log(error);
-    //   throw error;
-    // }
+    try {
+      const result = await this.historyModel.insertMany(historyArr, {
+        ordered: false,
+      });
+      console.log(`${result.length}개만 누적 성공`);
+      return result;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   }
 }
