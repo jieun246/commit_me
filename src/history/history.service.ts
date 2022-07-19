@@ -136,14 +136,13 @@ export class HistoryService {
             ...historyObj,
           });
         }
-
-        //페이지 및 파라미터 수정
-        page += 1;
-        requestObj = {
-          ...requestObj,
-          page,
-        };
       }
+      //페이지 및 파라미터 수정
+      page += 1;
+      requestObj = {
+        ...requestObj,
+        page,
+      };
     } while (true);
 
     // 데이터 일괄 등록
