@@ -32,9 +32,18 @@ export class HistoryService {
   }
 
   // 날짜별 출석 조회
-  async findAttendanceByUser(user_id: string) {
+  async findAttendanceByUser(user_id: string, attendance: Date) {
+    //출석일 그 다음 날짜로 셋팅
+    const next_max_attendance = new Date(
+      attendance.setDate(attendance.getDate() + 1),
+    );
+    //그 다음 날짜부터 조회하도록 설정
     const pipelie = [
-      { $match: { user_id } },
+      {
+        $match: {
+          $and: [{ user_id, action_date: { $gte: next_max_attendance } }],
+        },
+      },
       {
         $group: {
           _id: { $dateToString: { format: '%Y-%m-%d', date: '$action_date' } },

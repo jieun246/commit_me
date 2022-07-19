@@ -103,19 +103,31 @@ export class BatchService {
     //히스토리 누적: 유저별 날짜별로 조회
     const accounts = await this.accountService.findAll('');
     accounts.forEach(async (item) => {
-      const { user_id } = item;
+      const { user_id, attendances = 0 } = item;
       const requestArr = [];
-      const attendances = await this.historyService.findAttendanceByUser(
+
+      //출석일 최대값 구하기(없으면 디폴트 값 셋팅)
+      const result = await this.attendanceService.findMaxOne(user_id);
+      const maxAttendance = !result
+        ? new Date('2022-01-01')
+        : result.attendance_date;
+
+      //최근 출석일로부터 출석 리스트 조회
+      const attendance = await this.historyService.findAttendanceByUser(
         user_id,
+        maxAttendance,
       );
-      attendances.forEach(async (element) => {
+      //출석리스트 배열 셋팅
+      attendance.forEach(async (element) => {
         const { _id } = element;
         requestArr.push({ user_id, attendance_date: _id });
       });
+
+      //출석일 누적, 출석일수 업데이트
       await this.attendanceService.create(requestArr);
       await this.accountService.update({
         user_id,
-        attendances: requestArr.length,
+        attendances: attendances + requestArr.length,
       });
     });
     this.logger.log(`attedanceTask Done`);
