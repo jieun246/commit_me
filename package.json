@@ -1,0 +1,23 @@
+{
+  "name": "commit-me",
+  "version": "1.0.0",
+  "description": "커밋미 사이드 프로젝트",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jieun246/commit_me.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/jieun246/commit_me/issues"
+  },
+  "homepage": "https://github.com/jieun246/commit_me#readme",
+  "workspaces": [
+    "backend",
+    "frontend"
+  ]
+}
